@@ -110,6 +110,10 @@ public class JavadocService {
     return null;
   }
 
+  public Path faviconFor(final String project) {
+    return this.configuration.storage().resolve(project).resolve("favicon.ico");
+  }
+
   @Scheduled(
     initialDelay = REFRESH_INITIAL_DELAY,
     fixedRate = REFRESH_RATE,

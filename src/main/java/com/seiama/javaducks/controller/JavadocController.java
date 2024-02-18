@@ -23,6 +23,7 @@
  */
 package com.seiama.javaducks.controller;
 
+import com.seiama.javaducks.service.InjectionService;
 import com.seiama.javaducks.service.JavadocService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
@@ -64,10 +65,12 @@ public class JavadocController {
     ".zip", MediaType.parseMediaType("application/zip")
   );
   private final JavadocService service;
+  private final InjectionService injectionService;
 
   @Autowired
-  public JavadocController(final JavadocService service) {
+  public JavadocController(final JavadocService service, final InjectionService injectionService) {
     this.service = service;
+    this.injectionService = injectionService;
   }
 
   @GetMapping("/{project:[a-z]+}/{version:[0-9.]+-?(?:pre|SNAPSHOT)?(?:[0-9.]+)?}")
@@ -117,12 +120,21 @@ public class JavadocController {
                 }
               }
             })
-            .body(new FileSystemResource(file));
+            .body(this.injectionService.runInjections(file, project, version));
         }
       }
     }
     return notFound()
       .cacheControl(CacheControl.noCache())
       .build();
+  }
+
+  @GetMapping("/{project:[a-z]+}/favicon.ico")
+  @ResponseBody
+  public ResponseEntity<?> serveFavicon(@PathVariable final String project) {
+    return ok()
+      .cacheControl(STATICS_CACHE_CONTROL)
+      .headers(headers -> headers.setContentType(MediaType.parseMediaType("image/x-icon")))
+      .body(new FileSystemResource(this.service.faviconFor(project)));
   }
 }
