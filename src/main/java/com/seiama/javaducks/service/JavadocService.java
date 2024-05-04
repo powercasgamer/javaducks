@@ -28,7 +28,6 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.seiama.javaducks.configuration.properties.AppConfiguration;
 import com.seiama.javaducks.util.maven.MavenHashType;
-import com.seiama.javaducks.util.crypto.HashAlgorithm;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
