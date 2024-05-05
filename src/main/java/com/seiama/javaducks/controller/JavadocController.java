@@ -120,7 +120,7 @@ public class JavadocController {
                 }
               }
             })
-            .body(this.injectionService.runInjections(file, project, version));
+            .body(this.injectionService.runInjections(file, this.service.configuration().storage().resolve(project), project, version));
         }
       }
     }

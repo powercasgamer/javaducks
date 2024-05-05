@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DuckInjection implements Injection {
   @Override
-  public boolean canInject(final Path file) {
+  public boolean canInject(final Path file, final Path projectPath) {
     return file.toString().endsWith(".html");
   }
 

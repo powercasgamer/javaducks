@@ -48,8 +48,8 @@ public class InjectionService {
     this.injections = injections;
   }
 
-  public Object runInjections(final Path file, final String project, final String version) {
-    final List<Injection> applicableInjections = this.injections.stream().filter(injection -> injection.canInject(file)).toList();
+  public Object runInjections(final Path file, final Path projectPath, final String project, final String version) {
+    final List<Injection> applicableInjections = this.injections.stream().filter(injection -> injection.canInject(file, projectPath)).toList();
     if (applicableInjections.isEmpty()) {
       return new FileSystemResource(file);
     }

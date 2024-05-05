@@ -26,7 +26,7 @@ package com.seiama.javaducks.injection;
 import java.nio.file.Path;
 
 public interface Injection {
-  boolean canInject(Path file);
+  boolean canInject(Path file, Path projectPath);
 
   String inject(String line, Path file, String project, String version);
 }

@@ -23,6 +23,7 @@
  */
 package com.seiama.javaducks.injection;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.springframework.stereotype.Component;
 
@@ -30,8 +31,8 @@ import org.springframework.stereotype.Component;
 public class FaviconInjection implements Injection {
 
   @Override
-  public boolean canInject(final Path file) {
-    return file.toString().endsWith(".html");
+  public boolean canInject(final Path file, final Path projectPath) {
+    return file.toString().endsWith(".html") && Files.exists(projectPath.resolve("favicon.ico"));
   }
 
   @Override
