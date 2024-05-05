@@ -26,6 +26,7 @@ package com.seiama.javaducks.configuration.properties;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -39,22 +40,28 @@ public record AppConfiguration(
   @NullMarked
   public record EndpointConfiguration(
     String name,
-    List<Version> versions
+    Map<String, VersionGroup> versionsGroups
   ) {
     @NullMarked
-    public record Version(
-      String name,
-      String path,
-      Type type
+    public record VersionGroup(
+      String version,
+      List<Version> versions
     ) {
-      public URI asset(final String name) {
-        return URI.create(this.path + name);
-      }
-
       @NullMarked
-      public enum Type {
-        SNAPSHOT,
-        RELEASE,
+      public record Version(
+        String name,
+        String path,
+        Type type
+      ) {
+        public URI asset(final String name) {
+          return URI.create(this.path + name);
+        }
+
+        @NullMarked
+        public enum Type {
+          SNAPSHOT,
+          RELEASE,
+        }
       }
     }
   }

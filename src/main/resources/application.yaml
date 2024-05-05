@@ -1,0 +1,32 @@
+app:
+  rootRedirect: https://jd.mizule.dev
+  storage: storage/
+  hashTypes: [SHA256, SHA1, MD1]
+  endpoints:
+    - name: "paper"
+      versionsGroups:
+        twenty:
+          version: 1.20
+          versions:
+#          - name: "1.20.6"
+#            path: https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/1.20.6-R0.1-SNAPSHOT/
+#            type: SNAPSHOT
+          - name: "1.20.5"
+            path: https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/1.20.5-R0.1-SNAPSHOT/
+            type: SNAPSHOT
+          - name: "1.20.0"
+            path: https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/1.20-R0.1-SNAPSHOT/
+            type: SNAPSHOT
+        nineteen:
+          version: 1.19
+          versions:
+          - name: 1.19.4
+            path: https://repo.papermc.io/repository/maven-public/io/papermc/paper/paper-api/1.19.4-R0.1-SNAPSHOT/
+            type: SNAPSHOT
+
+server:
+  port : 8059
+logging:
+  level:
+    root: INFO
+#    com.seiama.javaducks: DEBUG

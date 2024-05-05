@@ -23,15 +23,10 @@
  */
 package com.seiama.javaducks.controller;
 
+import com.seiama.javaducks.configuration.properties.AppConfiguration;
 import com.seiama.javaducks.service.JavadocService;
+import com.vdurmont.semver4j.Semver;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.util.Map;
-import java.util.regex.Pattern;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +41,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.HandlerMapping;
+
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static org.springframework.http.ResponseEntity.notFound;
 import static org.springframework.http.ResponseEntity.ok;
@@ -65,10 +69,12 @@ public class JavadocController {
     ".zip", MediaType.parseMediaType("application/zip")
   );
   private final JavadocService service;
+  private final AppConfiguration appConfiguration;
 
   @Autowired
-  public JavadocController(final JavadocService service) {
+  public JavadocController(final JavadocService service, final AppConfiguration appConfiguration) {
     this.service = service;
+    this.appConfiguration = appConfiguration;
   }
 
   @GetMapping("/{project:[a-z]+}/{version:[0-9.]+-?(?:pre|SNAPSHOT)?(?:[0-9.]+)?}")
@@ -90,6 +96,20 @@ public class JavadocController {
     @PathVariable final String project,
     @PathVariable final String version
   ) {
+    final AppConfiguration.EndpointConfiguration endpointConfiguration = this.project(project);
+    if (endpointConfiguration != null) {
+      // idk try
+      final AppConfiguration.EndpointConfiguration.VersionGroup group = this.findFromVersion(endpointConfiguration, version);
+      if (group != null) {
+        final AppConfiguration.EndpointConfiguration.VersionGroup.Version latestVersion = this.latestVersionFromGroup(group);
+        if (latestVersion != null) {
+          return status(HttpStatus.FOUND)
+            .location(URI.create(request.getRequestURI().replace(version, latestVersion.name())))
+            .build();
+        }
+      }
+    }
+
     final String root = "/%s/%s".formatted(project, version);
     //noinspection resource - This warning can be ignored, we want to keep this FS open.
     final @Nullable FileSystem fs = this.service.contentsFor(new JavadocService.Key(project, version));
@@ -119,5 +139,42 @@ public class JavadocController {
     return notFound()
       .cacheControl(CacheControl.noCache())
       .build();
+  }
+
+  // all ugly temporary code
+  public AppConfiguration.@Nullable EndpointConfiguration project(final String name) {
+    for (final AppConfiguration.EndpointConfiguration project : this.appConfiguration.endpoints()) {
+      if (project.name().equalsIgnoreCase(name)) {
+        return project;
+      }
+    }
+    return null;
+  }
+
+  public AppConfiguration.EndpointConfiguration.VersionGroup.@Nullable Version latestVersionFromGroup(final AppConfiguration.EndpointConfiguration.VersionGroup group) {
+    AppConfiguration.EndpointConfiguration.VersionGroup.Version latestVersion = null;
+    String latestPatchVersion = null;
+    Semver latestSemver = null;
+    for (final AppConfiguration.EndpointConfiguration.VersionGroup.Version version : group.versions()) {
+      Semver semver = new Semver(version.name());
+      // Check if this version is greater than the current latest patch version
+      if (latestPatchVersion == null || semver.isGreaterThan(latestSemver) || semver.getPatch() > latestSemver.getPatch()) {
+        latestPatchVersion = version.name();
+        latestSemver = semver;
+        latestVersion = version;
+      }
+    }
+    return latestVersion;
+  }
+
+  public AppConfiguration.EndpointConfiguration.@Nullable VersionGroup findFromVersion(final AppConfiguration.EndpointConfiguration project, final String version) {
+    for (final Map.Entry<String, AppConfiguration.EndpointConfiguration.VersionGroup> group : project.versionsGroups().entrySet()) {
+      final Semver groupSemver = new Semver(group.getValue().version(), Semver.SemverType.LOOSE);
+      final Semver versionSemver = new Semver(version, Semver.SemverType.LOOSE);
+      if (Objects.equals(groupSemver.getMinor(), versionSemver.getMinor())) {
+        return group.getValue();
+      }
+    }
+    return null;
   }
 }
