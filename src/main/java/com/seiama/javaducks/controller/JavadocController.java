@@ -123,6 +123,7 @@ public class JavadocController {
     }
     return notFound()
       .cacheControl(CacheControl.noCache())
+      .location(this.service.configuration().rootRedirect())
       .build();
   }
 }

@@ -260,6 +260,10 @@ public class JavadocService {
     return null;
   }
 
+  public AppConfiguration configuration() {
+    return this.configuration;
+  }
+
   @NullMarked
   public record Key(
     String project,
