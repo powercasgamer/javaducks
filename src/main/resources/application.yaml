@@ -34,8 +34,14 @@ app:
         - name: '1.19'
           path: 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
           type: 'SNAPSHOT'
+        - name: '1.20'
+          path: 'dev.folia:folia-api:1.20.4-R0.1-SNAPSHOT'
+          type: 'SNAPSHOT'
     - name: 'paper'
       versions:
+        - name: '1.20'
+          path: 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
+          type: 'SNAPSHOT'
         - name: '1.20.6'
           path: 'io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT'
           type: 'SNAPSHOT'
@@ -45,4 +51,5 @@ server:
 logging:
   level:
     root: INFO
-#    com.seiama.javaducks: DEBUG
+    com.seiama.javaducks: DEBUG
+    com.seiama.javaducks.*: DEBUG
